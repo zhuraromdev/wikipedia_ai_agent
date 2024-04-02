@@ -1,3 +1,10 @@
+# query = 'What is SpaceX?'
+# query = "most common species of Canadian ducks"
+# query = "Roman Empire"
+# query = 'When was born Elon Musk?'
+# query = "the most common species of Canadian ducks?"
+# query = 'War in Ukraine 2022'
+# query = 'Tell me which companies CEO is Elon Musk?'
 
 import numpy as np
 
@@ -9,19 +16,14 @@ def main():
     scraper = WikipediaScraper()
     processor = EmbeddingProcessor()
 
-    # query = 'What is SpaceX?'
-    # query = "most common species of Canadian ducks"
-    # query = "Roman Empire"
-    query = 'When was born Elon Musk?'
-    # query = "the most common species of Canadian ducks?"
-    # query = 'War in Ukraine 2022'
-    # query = 'Tell me which companies CEO is Elon Musk?'
+    query = input("Enter your query: ")
 
     is_searched, url = scraper.search_wikipedia(query)
     if is_searched:
         article_links = scraper.get_article_links()
         all_paragraphs = []
 
+        # If no article links found, extract information from the main article
         if not article_links:
             title, paragraphs = scraper.get_article_info(url)
 
@@ -29,6 +31,7 @@ def main():
             print(f'Paragraphs: {paragraphs}')
 
         else:
+            # Extracting information from all linked articles
             for url in article_links:
                 title, paragraphs = scraper.get_article_info(url)
                 all_paragraphs.extend(paragraphs)
@@ -46,3 +49,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -12,13 +12,37 @@ from components.instructions import Instruction
 
 
 class WikipediaScraper:
+    """
+    A class to interact with the Wikipedia website and scrape information.
+
+    Attributes:
+        options (ChromeOptions): Options for configuring the Chrome browser.
+        service (ChromeService): Service for managing Chrome browser.
+        driver (WebDriver): WebDriver instance for controlling the browser.
+        wait (WebDriverWait): WebDriverWait instance for waiting for elements to load.
+    """
+
     def __init__(self) -> None:
+        """
+        Initializes the WikipediaScraper with required configurations.
+        """
         self.options = ChromeOptions()
         self.service = ChromeService(ChromeDriverManager().install())
         self.driver = webdriver.Chrome(service=self.service, options=self.options)
         self.wait = WebDriverWait(self.driver, 10)
 
     def execute_instruction(self, instruction: Instruction):
+        """
+        Executes a single instruction.
+
+        Args:
+            instruction (Instruction): Instruction object containing details of action, target element, and input data.
+
+        Raises:
+            TimeoutException: If the operation times out while waiting for an element.
+            NoSuchElementException: If the target element is not found.
+            Exception: For other unexpected errors during instruction execution.
+        """
         try:
             if instruction.action_type == "navigate":
                 self.driver.get(instruction.input_data)
@@ -43,10 +67,25 @@ class WikipediaScraper:
             print(f"An error occurred while executing instruction: {instruction.action_type}. Error: {e}")
 
     def execute_instructions(self, instructions: List[Instruction]):
+        """
+        Executes a list of instructions sequentially.
+
+        Args:
+            instructions (List[Instruction]): List of Instruction objects to be executed.
+        """
         for instruction in instructions:
             self.execute_instruction(instruction)
 
     def search_wikipedia(self, query: str) -> Tuple[bool, str]:
+        """
+        Searches Wikipedia for the given query.
+
+        Args:
+            query (str): The search query.
+
+        Returns:
+            Tuple[bool, str]: A tuple containing a boolean flag indicating if the search was successful and the URL of the search result page.
+        """
         try:
             self.driver.get("https://www.wikipedia.org/")
             english_link = self.wait.until(EC.element_to_be_clickable((By.ID, "js-link-box-en")))
@@ -64,6 +103,12 @@ class WikipediaScraper:
         return True, self.driver.current_url
 
     def get_article_links(self) -> List[str]:
+        """
+        Retrieves a list of article links from the search result page.
+
+        Returns:
+            List[str]: A list of URLs of the search result articles.
+        """
         links = []
         try:
             self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".mw-search-results")))
@@ -74,6 +119,15 @@ class WikipediaScraper:
         return links
 
     def get_article_info(self, url: str) -> Tuple[str, List[str]]:
+        """
+        Retrieves the title and paragraphs of the article from the given URL.
+
+        Args:
+            url (str): The URL of the Wikipedia article.
+
+        Returns:
+            Tuple[str, List[str]]: A tuple containing the title of the article and a list of paragraphs in the article.
+        """
         try:
             self.driver.get(url)
             heading = self.wait.until(EC.presence_of_element_located((By.ID, "firstHeading"))).text
